@@ -12,6 +12,65 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import mplfinance as mpf
 from datetime import datetime, date
+import os
+import base64
+import subprocess
+
+# Function to create a simple ASCII line chart
+def plot_ascii_chart(data: pd.DataFrame, symbol: str, height: int = 10):
+    """Generate a simple ASCII line chart for closing prices in the terminal."""
+    try:
+        close_prices = data['Close'].dropna()
+        if close_prices.size < 2:  # Use .size instead of len for pandas Series
+            return "Not enough data to plot ASCII chart."
+        
+        # Normalize prices to fit within the height
+        min_price = close_prices.min()
+        max_price = close_prices.max()
+        price_range = max_price - min_price
+        if price_range == 0:
+            return "Price range is zero, cannot plot ASCII chart."
+        
+        # Scale prices to fit within the height
+        scaled_prices = [int((price - min_price) / price_range * (height - 1)) for price in close_prices]
+        
+        # Create the chart
+        chart = []
+        for h in range(height - 1, -1, -1):  # From top to bottom
+            line = []
+            for price in scaled_prices:
+                line.append('*' if price >= h else ' ')
+            chart.append('|' + ''.join(line) + '|')
+        
+        # Add x-axis and labels
+        chart.append('-' * (len(close_prices) + 2))
+        chart.append(f"{symbol} Closing Prices ({min_price:.2f} to {max_price:.2f})")
+        return '\n'.join(chart)
+    except Exception as e:
+        return f"Error generating ASCII chart: {str(e)}"
+
+# Function to convert PNG to base64 string
+def image_to_base64(file_path: str):
+    """Convert an image file to a base64 string for preview."""
+    try:
+        with open(file_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+        return encoded_string, ""
+    except Exception as e:
+        return None, f"Error converting image to base64: {str(e)}"
+
+# Function to open image using system default viewer
+def open_image(file_path: str):
+    """Attempt to open the image file with the system default viewer."""
+    try:
+        if os.name == 'nt':  # Windows
+            os.startfile(file_path)
+        elif os.name == 'posix':  # macOS or Linux
+            opener = 'open' if sys.platform == 'darwin' else 'xdg-open'
+            subprocess.run([opener, file_path], check=True)
+        return "Image opened in default viewer.", ""
+    except Exception as e:
+        return None, f"Error opening image: {str(e)}. Try opening {file_path} manually or use the base64 string."
 
 # Note about Google Finance
 print("Note: Google Finance does not provide a public API for Python. Using yfinance (Yahoo Finance) as a reliable alternative.")
@@ -111,6 +170,43 @@ try:
     except Exception as e:
         print(f"Error generating candlestick chart: {str(e)}")
 
+    # Plot line chart for closing prices
+    line_chart_path = f"{stock_symbol}_linechart.png"
+    try:
+        plt.figure(figsize=(10, 5))
+        plt.plot(stock_data.index, stock_data['Close'], label='Close Price', color='blue')
+        plt.title(f"{stock_symbol} Closing Price")
+        plt.xlabel('Date')
+        plt.ylabel('Price')
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(line_chart_path)
+        plt.close()
+        print(f"Line chart saved as {line_chart_path}")
+        
+        # Display ASCII line chart in terminal
+        print(f"\nASCII Line Chart for {stock_symbol} Closing Prices:")
+        ascii_chart = plot_ascii_chart(stock_data, stock_symbol)
+        print(ascii_chart)
+
+        # Attempt to open the line chart in default viewer
+        print(f"\nAttempting to open {line_chart_path}...")
+        open_result, open_error = open_image(line_chart_path)
+        if open_error:
+            print(open_error)
+        else:
+            print(open_result)
+
+        # Provide base64 string for manual preview
+        base64_str, base64_error = image_to_base64(line_chart_path)
+        if base64_error:
+            print(base64_error)
+        else:
+            print(f"\nBase64 string of {line_chart_path} (copy to browser as data:image/png;base64,<string>):")
+            print(base64_str[:100] + "... (truncated, copy full string from output)")
+    except Exception as e:
+        print(f"Error generating line chart: {str(e)}")
+
     # Fetch additional financial info
     try:
         ticker = yf.Ticker(stock_symbol)
@@ -151,7 +247,7 @@ try:
             if max_de is not None and (debt_to_equity == 'N/A' or debt_to_equity > max_de):
                 meets_criteria = False
                 print(f"Does not meet max D/E: {debt_to_equity} > {max_de}")
-
+                
             if meets_criteria:
                 print(f"{stock_symbol} meets all your criteria!")
             else:
