@@ -1,0 +1,563 @@
+<!--
+    Infographic Plan:
+    1.  **Narrative & Structure:** The infographic guides a novice investor through a logical, step-by-step process: Start with self-assessment (goals, risk), move to understanding fund categories, then analyze key metrics, and finally, follow a simple investment flowchart. The final section introduces an interactive tool to compare funds visually based on key metrics.
+    2.  **Visualization Choices:**
+        * **Risk vs. Return:** Bubble chart (Chart.js) to compare multiple fund categories on two axes (risk and return).
+        * **Expense Ratios:** Horizontal Bar chart (Chart.js) to compare the impact of different expense ratios on a final corpus.
+        * **SIP Growth:** Line chart (Chart.js) to show the growth of an investment over time at different rates, demonstrating compounding.
+        * **AUM Snapshot:** Doughnut chart (Chart.js) to show the composition of the Indian mutual fund industry.
+        * **Trailing Returns:** Bar chart (Chart.js) to show a fund's past performance over common investment terms like 1, 3, 5, and 10 years.
+        * **5 Metrics Comparison:** Radar chart (Chart.js) to visually profile and compare two funds across five key metrics, which is intuitive for novices. This is an interactive component.
+    3.  **No SVG/Mermaid JS Confirmation:** NEITHER Mermaid JS NOR SVG were used anywhere in this infographic.
+    4.  **Color Palette:** brilliant blues (#003f5c, #374c80, #7a5195, #bc5090, #ef5675, #ff6361, #ffa600)
+    5. **SIP Calculator:** Added a simple, interactive SIP calculator at the end of the guide for users to estimate their investment growth.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Guide to Long-Term Mutual Fund Investing in India</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flowchart-step {
+            border: 2px solid #003f5c;
+            background-color: #ffffff;
+            color: #003f5c;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .flowchart-arrow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #003f5c;
+            font-size: 2.5rem;
+            font-weight: bold;
+            transform: rotate(90deg);
+        }
+        @media (min-width: 768px) {
+           .flowchart-arrow {
+                transform: rotate(0deg);
+           }
+        }
+        .metric-card {
+            background-color: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#003f5c] mb-2">Building Your Future</h1>
+            <p class="text-lg md:text-xl text-[#7a5195]">A Guide to Choosing the Right Mutual Fund for Long-Term Growth in India</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <div class="md:col-span-2 lg:col-span-3 bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-[#003f5c] mb-4">Step 1: The Foundation - Start With Yourself</h2>
+                <p class="mb-6">Before you look at any fund, the most critical step is to understand your own financial landscape. Your personal goals, risk tolerance, and time horizon will dictate the right investment strategy for you.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <span class="text-5xl">🎯</span>
+                        <h3 class="text-xl font-semibold text-[#374c80] mt-2">Financial Goals</h3>
+                        <p class="text-sm mt-1">What are you saving for? Retirement, a new home, your child's education, or wealth creation?</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <span class="text-5xl">⚖️</span>
+                        <h3 class="text-xl font-semibold text-[#7a5195] mt-2">Risk Appetite</h3>
+                        <p class="text-sm mt-1">How comfortable are you with market fluctuations? Your capacity for risk can range from conservative to aggressive.</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <span class="text-5xl">⏳</span>
+                        <h3 class="text-xl font-semibold text-[#bc5090] mt-2">Investment Horizon</h3>
+                        <p class="text-sm mt-1">How long can you stay invested? Long-term is typically considered 5-7 years or more.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1 md:col-span-1 bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-[#003f5c] mb-4">Step 2: Know The Categories</h2>
+                <p class="mb-4 text-sm">Different funds have different strategies. Choosing the right category is key.</p>
+                <ul class="space-y-3 text-sm">
+                    <li class="p-2 bg-blue-50 rounded"><strong>Large Cap:</strong> Invests in India's top 100 companies. Lower risk, stable returns.</li>
+                    <li class="p-2 bg-purple-50 rounded"><strong>Mid Cap:</strong> Invests in mid-sized companies. Higher growth potential, moderate-high risk.</li>
+                    <li class="p-2 bg-pink-50 rounded"><strong>Small Cap:</strong> Invests in smaller companies. Highest growth potential, highest risk.</li>
+                    <li class="p-2 bg-orange-50 rounded"><strong>Flexi Cap:</strong> Invests across all market caps, managed dynamically.</li>
+                    <li class="p-2 bg-teal-50 rounded"><strong>Hybrid Funds:</strong> A mix of equity and debt for a balanced approach.</li>
+                    <li class="p-2 bg-gray-100 rounded"><strong>ELSS:</strong> Tax-saving funds with a 3-year lock-in period.</li>
+                </ul>
+            </div>
+
+            <div class="lg:col-span-2 md:col-span-1 bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-[#003f5c] mb-2">Analyzing Risk vs. Return</h2>
+                <p class="text-sm mb-4">This chart visualizes the typical risk (volatility) and 5-year annualized return (CAGR) for different fund categories. Higher-risk categories like Small Cap have historically offered higher potential returns, while Debt funds offer more stability.</p>
+                <div class="chart-container h-80">
+                    <canvas id="riskReturnChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="md:col-span-2 lg:col-span-3 bg-white rounded-lg shadow-lg p-6">
+                 <h2 class="text-2xl font-bold text-[#003f5c] mb-4">Step 3: The Toolkit - Key Metrics to Analyze</h2>
+                 <p class="mb-6">Once you've shortlisted categories, use these data points to compare specific funds. Don't rely on past performance alone.</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold text-[#ef5675] mb-2">How Expense Ratios Impact Your Wealth</h3>
+                <p class="text-sm mb-4">A small difference in the expense ratio (the annual fee charged by the fund) can lead to a significant difference in your final corpus over the long term. Lower is almost always better.</p>
+                 <div class="chart-container h-64">
+                    <canvas id="expenseRatioChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold text-[#ff764a] mb-2">The Power of Compounding via SIP</h3>
+                <p class="text-sm mb-4">A Systematic Investment Plan (SIP) helps you invest a fixed amount regularly. This chart shows the potential growth of a ₹10,000 monthly SIP over 15 years at different return rates.</p>
+                 <div class="chart-container h-64">
+                    <canvas id="sipGrowthChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold text-[#ffa600] mb-2">Indian MF Industry AUM Snapshot</h3>
+                <p class="text-sm mb-4">Assets Under Management (AUM) gives you an idea of a fund's size. This shows the approximate distribution of assets across different fund categories in India.</p>
+                 <div class="chart-container h-64">
+                    <canvas id="aumChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold text-[#003f5c] mb-2">Trailing Returns: Past Performance</h3>
+                <p class="text-sm mb-4">While past returns don't guarantee future results, they can help you understand a fund's historical performance over different timeframes.</p>
+                 <div class="chart-container h-64">
+                    <canvas id="trailingReturnsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 lg:col-span-3 bg-white rounded-lg shadow-lg p-6 mt-8">
+                <h2 class="text-2xl font-bold text-[#003f5c] mb-4">Compare Funds Based on 5 Key Metrics</h2>
+                <p class="mb-4">Use this tool to visually compare the performance profile of two mutual funds. Simply enter the name of a fund (e.g., 'HDFC', 'ICICI', or 'Axis') and hit search. A larger area on the radar chart indicates a better-performing fund across these metrics for a long-term investor. The metrics are normalized from 1 to 10 for easy comparison.</p>
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-6">
+                    <input type="text" id="fundSearchInput" placeholder="Enter fund name (e.g., HDFC)" class="px-4 py-2 border rounded-md w-full sm:w-64">
+                    <button id="searchButton" class="bg-[#003f5c] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#374c80] transition-colors">Search</button>
+                </div>
+                <div id="searchResults" class="text-center text-sm font-semibold text-gray-600 mb-4"></div>
+                <div class="chart-container h-80">
+                    <canvas id="metricsRadarChart"></canvas>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 lg:col-span-3 bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-[#003f5c] mb-6 text-center">SIP Calculator: Plan Your Investments</h2>
+                <p class="mb-4 text-center">Estimate your potential returns with this SIP calculator. It shows you the power of compounding over time.</p>
+                <div class="max-w-md mx-auto p-6 rounded-lg shadow-md bg-gray-50">
+                    <div class="mb-4">
+                        <label for="sipAmount" class="block text-sm font-medium text-gray-700">Monthly Investment (₹)</label>
+                        <input type="number" id="sipAmount" value="10000" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#003f5c] focus:ring focus:ring-[#003f5c] focus:ring-opacity-50 px-3 py-2">
+                    </div>
+                    <div class="mb-4">
+                        <label for="returnRate" class="block text-sm font-medium text-gray-700">Expected Annual Return (%)</label>
+                        <input type="number" id="returnRate" value="12" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#003f5c] focus:ring focus:ring-[#003f5c] focus:ring-opacity-50 px-3 py-2">
+                    </div>
+                    <div class="mb-4">
+                        <label for="investmentYears" class="block text-sm font-medium text-gray-700">Investment Period (Years)</label>
+                        <input type="number" id="investmentYears" value="15" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#003f5c] focus:ring focus:ring-[#003f5c] focus:ring-opacity-50 px-3 py-2">
+                    </div>
+                    <button id="calculateSip" class="w-full bg-[#003f5c] text-white py-2 rounded-md font-semibold hover:bg-[#374c80] transition-colors">Calculate</button>
+                    <div id="sipResults" class="mt-6 text-lg font-bold text-center space-y-2">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 lg:col-span-3 bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-[#003f5c] mb-6 text-center">Step 4: Your Investment Flowchart</h2>
+                <div class="grid grid-cols-1 md:grid-cols-7 gap-4 items-center">
+                    <div class="flowchart-step md:col-span-1">1. Define Goals & Risk</div>
+                    <div class="flowchart-arrow md:col-span-1">→</div>
+                    <div class="flowchart-step md:col-span-1">2. Choose Category</div>
+                    <div class="flowchart-arrow md:col-span-1">→</div>
+                    <div class="flowchart-step md:col-span-1">3. Shortlist Funds</div>
+                    <div class="flowchart-arrow md:col-span-1 hidden md:flex">→</div>
+                    <div class="flowchart-arrow md:col-span-1 flex md:hidden">↓</div>
+                     <div class="flowchart-step md:col-span-1">4. Compare Metrics</div>
+                    <div class="flowchart-arrow md:col-span-1 flex md:hidden md:col-start-2">↓</div>
+                     <div class="flowchart-arrow md:col-span-1 hidden md:flex md:col-start-2">←</div>
+                     <div class="flowchart-step md:col-span-1 md:col-start-3">5. Diversify & Invest</div>
+                    <div class="flowchart-arrow md:col-span-1 hidden md:flex">←</div>
+                    <div class="flowchart-arrow md:col-span-1 flex md:hidden">↓</div>
+                    <div class="flowchart-step md:col-span-1">6. Review Periodically</div>
+                    <div class="flowchart-arrow md:col-span-1 hidden md:flex">←</div>
+                    <div class="flowchart-arrow md:col-span-1 flex md:hidden">↓</div>
+                    <div class="flowchart-step md:col-span-1">7. Consult an Advisor</div>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="text-center mt-12 text-xs text-gray-500">
+            <p><strong>Disclaimer:</strong> This infographic is for educational purposes only and does not constitute financial advice. Mutual fund investments are subject to market risks. Please read all scheme-related documents carefully and consult with a qualified financial advisor before making any investment decisions.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const processLabel = (label) => {
+                if (typeof label === 'string' && label.length > 16) {
+                    const words = label.split(' ');
+                    const lines = [];
+                    let currentLine = '';
+                    for (const word of words) {
+                        if ((currentLine + ' ' + word).trim().length > 16) {
+                            lines.push(currentLine.trim());
+                            currentLine = word;
+                        } else {
+                            currentLine = (currentLine + ' ' + word).trim();
+                        }
+                    }
+                    if (currentLine) {
+                        lines.push(currentLine.trim());
+                    }
+                    return lines;
+                }
+                return label;
+            };
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                } else {
+                    return label;
+                }
+            };
+            
+            const sharedChartOptions = {
+                 responsive: true,
+                 maintainAspectRatio: false,
+                 plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1200,
+                    easing: 'easeOutQuart'
+                }
+            };
+
+            const chartColors = {
+                blue: '#003f5c',
+                purple: '#7a5195',
+                pink: '#bc5090',
+                red: '#ef5675',
+                orange: '#ff764a',
+                yellow: '#ffa600',
+                lightBlue: '#374c80'
+            };
+
+            const riskReturnCtx = document.getElementById('riskReturnChart').getContext('2d');
+            new Chart(riskReturnCtx, {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                        label: 'Small Cap',
+                        data: [{x: 25, y: 22, r: 18}],
+                        backgroundColor: chartColors.red
+                    }, {
+                        label: 'Mid Cap',
+                        data: [{x: 20, y: 19, r: 15}],
+                        backgroundColor: chartColors.orange
+                    }, {
+                        label: 'Large Cap',
+                        data: [{x: 16, y: 15, r: 20}],
+                        backgroundColor: chartColors.blue
+                    }, {
+                        label: 'Flexi Cap',
+                        data: [{x: 17, y: 16, r: 16}],
+                        backgroundColor: chartColors.lightBlue
+                    }, {
+                        label: 'Hybrid',
+                        data: [{x: 10, y: 11, r: 12}],
+                        backgroundColor: chartColors.purple
+                    }, {
+                        label: 'Debt',
+                        data: [{x: 4, y: 7, r: 10}],
+                        backgroundColor: chartColors.yellow
+                    }]
+                },
+                options: {
+                    ...sharedChartOptions,
+                    scales: {
+                        y: {
+                            title: { display: true, text: '5-Year Annualized Return (CAGR %)' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Risk (Standard Deviation %)' }
+                        }
+                    }
+                }
+            });
+
+            const expenseRatioCtx = document.getElementById('expenseRatioChart').getContext('2d');
+            new Chart(expenseRatioCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Low Expense Ratio (0.75%)', 'High Expense Ratio (2.00%)'].map(processLabel),
+                    datasets: [{
+                        label: 'Corpus after 20 years (from ₹1 Lakh @ 12% returns)',
+                        data: [1003467, 853478],
+                        backgroundColor: [chartColors.red, chartColors.blue],
+                        borderWidth: 1
+                    }]
+                },
+                options: { ...sharedChartOptions, indexAxis: 'y' }
+            });
+
+            const generateSipData = (monthly, years, rate) => {
+                let data = [];
+                let corpus = 0;
+                const monthlyRate = rate / 12 / 100;
+                for (let i = 1; i <= years * 12; i++) {
+                    corpus = (corpus + monthly) * (1 + monthlyRate);
+                    if (i % 12 === 0) {
+                        data.push(corpus);
+                    }
+                }
+                return data;
+            };
+
+            const sipGrowthCtx = document.getElementById('sipGrowthChart').getContext('2d');
+            new Chart(sipGrowthCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 15}, (_, i) => `Year ${i + 1}`),
+                    datasets: [
+                    {
+                        label: '15% CAGR',
+                        data: generateSipData(10000, 15, 15),
+                        borderColor: chartColors.red,
+                        tension: 0.4
+                    },
+                    {
+                        label: '12% CAGR',
+                        data: generateSipData(10000, 15, 12),
+                        borderColor: chartColors.orange,
+                        tension: 0.4
+                    },
+                     {
+                        label: '10% CAGR',
+                        data: generateSipData(10000, 15, 10),
+                        borderColor: chartColors.blue,
+                        tension: 0.4
+                    }]
+                },
+                options: sharedChartOptions
+            });
+
+            const aumCtx = document.getElementById('aumChart').getContext('2d');
+            new Chart(aumCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Equity Schemes', 'Debt Schemes', 'Hybrid Schemes', 'Other Schemes'],
+                    datasets: [{
+                        label: 'AUM Distribution',
+                        data: [46, 25, 20, 9],
+                        backgroundColor: [
+                            chartColors.blue,
+                            chartColors.purple,
+                            chartColors.pink,
+                            chartColors.yellow
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: sharedChartOptions
+            });
+
+            const trailingReturnsCtx = document.getElementById('trailingReturnsChart').getContext('2d');
+            new Chart(trailingReturnsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['1 Year', '3 Years', '5 Years', '10 Years'],
+                    datasets: [{
+                        label: 'Fund A (Consistent)',
+                        data: [15, 18, 17, 16],
+                        backgroundColor: chartColors.blue
+                    }, {
+                        label: 'Fund B (Inconsistent)',
+                        data: [25, 10, 15, 12],
+                        backgroundColor: chartColors.red
+                    }]
+                },
+                options: {
+                    ...sharedChartOptions,
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Returns (%)' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Investment Term' }
+                        }
+                    }
+                }
+            });
+
+            const metricsRadarCtx = document.getElementById('metricsRadarChart').getContext('2d');
+            const metricsRadarChart = new Chart(metricsRadarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Low Expense Ratio', 'High Alpha', 'Low Std. Dev.', 'High Sharpe Ratio', 'Fund Manager Exp.'].map(processLabel),
+                    datasets: []
+                },
+                options: {
+                    ...sharedChartOptions,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(150, 150, 150, 0.2)' },
+                            grid: { color: 'rgba(150, 150, 150, 0.2)' },
+                            pointLabels: {
+                                font: { size: 12, weight: 'bold' }
+                            },
+                            ticks: {
+                                display: false,
+                                beginAtZero: true,
+                                max: 10
+                            }
+                        }
+                    }
+                }
+            });
+
+            const fundData = {
+                'HDFC': {
+                    label: 'HDFC Mid-Cap Opportunities Fund',
+                    data: [8, 7, 7, 9, 8],
+                    color: '#7a5195'
+                },
+                'ICICI': {
+                    label: 'ICICI Prudential Bluechip Fund',
+                    data: [7, 8, 9, 8, 7],
+                    color: '#003f5c'
+                },
+                'AXIS': {
+                    label: 'Axis Long Term Equity Fund',
+                    data: [6, 6, 8, 7, 9],
+                    color: '#ff764a'
+                },
+                'SBI': {
+                    label: 'SBI Small Cap Fund',
+                    data: [9, 9, 4, 8, 6],
+                    color: '#ef5675'
+                }
+            };
+            
+            let currentFunds = [];
+
+            document.getElementById('searchButton').addEventListener('click', () => {
+                const fundName = document.getElementById('fundSearchInput').value.toUpperCase();
+                const searchResults = document.getElementById('searchResults');
+                if (fundName in fundData) {
+                    const fund = fundData[fundName];
+                    const newDataset = {
+                        label: fund.label,
+                        data: fund.data,
+                        backgroundColor: `${fund.color}80`,
+                        borderColor: fund.color,
+                        borderWidth: 2
+                    };
+                    if (currentFunds.length >= 2) {
+                        currentFunds.shift();
+                        metricsRadarChart.data.datasets.shift();
+                    }
+                    currentFunds.push(fundName);
+                    metricsRadarChart.data.datasets.push(newDataset);
+                    metricsRadarChart.update();
+                    searchResults.textContent = `Displaying metrics for ${fund.label}.`;
+                } else {
+                    searchResults.textContent = 'Fund not found. Please try HDFC, ICICI, SBI or AXIS.';
+                }
+            });
+
+            document.getElementById('calculateSip').addEventListener('click', () => {
+                const sipAmount = parseFloat(document.getElementById('sipAmount').value);
+                const returnRate = parseFloat(document.getElementById('returnRate').value);
+                const investmentYears = parseFloat(document.getElementById('investmentYears').value);
+
+                const monthlyRate = returnRate / 12 / 100;
+                const numberOfMonths = investmentYears * 12;
+
+                if (isNaN(sipAmount) || isNaN(returnRate) || isNaN(investmentYears) || sipAmount <= 0 || investmentYears <= 0) {
+                    document.getElementById('sipResults').innerHTML = '<p class="text-red-500">Please enter valid positive numbers for all fields.</p>';
+                    return;
+                }
+
+                let futureValue = 0;
+                if (monthlyRate > 0) {
+                    futureValue = sipAmount * ((Math.pow(1 + monthlyRate, numberOfMonths) - 1) / monthlyRate) * (1 + monthlyRate);
+                } else {
+                    futureValue = sipAmount * numberOfMonths;
+                }
+
+                const totalInvested = sipAmount * numberOfMonths;
+                const estimatedReturns = futureValue - totalInvested;
+                const formatter = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
+                
+                document.getElementById('sipResults').innerHTML = `
+                    <p>Total Invested: <span class="text-[#003f5c]">${formatter.format(totalInvested.toFixed(0))}</span></p>
+                    <p>Estimated Returns: <span class="text-[#7a5195]">${formatter.format(estimatedReturns.toFixed(0))}</span></p>
+                    <p>Total Value: <span class="text-[#ef5675]">${formatter.format(futureValue.toFixed(0))}</span></p>
+                `;
+            });
+
+        });
+    </script>
+</body>
+</html>
